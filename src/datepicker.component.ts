@@ -68,22 +68,25 @@ import { Calendar } from './calendar';
       }
 
       .datepicker__calendar__content {
+        margin-top: 0.2em auto 0;
+      }
+
+      .datepicker__calendar__labels {
         display: -webkit-box;
         display: -ms-flexbox;
         display: flex;
-        -ms-flex-flow: wrap;
-            flex-flow: wrap;
         -webkit-box-pack: center;
            -ms-flex-pack: center;
          justify-content: center;
-        margin-top: 0.2em;
+        width: 100%;
+        margin-top: 0.4em;
       }
 
       .datepicker__calendar__label {
         display: inline-block;
         width: 2.2em;
         height: 2.2em;
-        margin: 0.2em;
+        margin: 0 0.2em;
         line-height: 2.2em;
         text-align: center;
         color: #d8d8d8;
@@ -104,7 +107,7 @@ import { Calendar } from './calendar';
         display: inline-block;
         width: 2.2em;
         height: 2.2em;
-        margin: 0.2em;
+        margin: 0.4em 0.2em 0;
         border-radius: 2.2em;
         line-height: 2.2em;
         text-align: center;
@@ -226,11 +229,13 @@ import { Calendar } from './calendar';
         <div
           class="datepicker__calendar__content"
         >
-          <div
-            class="datepicker__calendar__label"
-            *ngFor="let day of dayNames"
-          >
-            {{ day }}
+          <div class="datepicker__calendar__labels">
+            <div
+              class="datepicker__calendar__label"
+              *ngFor="let day of dayNames"
+            >
+              {{ day }}
+            </div>
           </div>
           <div
             [@calendarAnimation]="animate"
@@ -477,6 +482,11 @@ export class DatepickerComponent implements OnInit, OnChanges {
   // Listeners
   // ------------------------------------------------------------------------------------
   handleGlobalClick(event: MouseEvent): void {
+    const withinElement = this.elementRef.nativeElement.contains(event.target);
+    console.group('Within Element')
+    console.log(withinElement ? 'Yes' : 'No');
+    console.groupEnd();
+    console.log('');
     if (!this.elementRef.nativeElement.contains(event.target)) {
       this.closeCalendar();
     }

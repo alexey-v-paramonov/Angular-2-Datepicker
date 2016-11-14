@@ -15,13 +15,6 @@ import { Component, Input } from '@angular/core';
       {{ date }}
       <p>
       Mirror(disabled, DD-MM-YYYY):
-      <material-datepicker
-        placeholder="nothing is selected"
-        disabled="true"
-        [(date)]="date"
-        dateFormat="DD-MM-YYYY"
-      ></material-datepicker>
-
     `
 })
 export class AppComponent {
