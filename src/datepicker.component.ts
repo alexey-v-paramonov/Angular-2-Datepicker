@@ -2,6 +2,7 @@ import {
   animate, Component, ElementRef, EventEmitter, Input, keyframes, OnChanges,
   OnInit, Output, Renderer, SimpleChange, state, style, transition, trigger
 } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 import { Calendar } from './calendar';
 
@@ -40,7 +41,7 @@ import { Calendar } from './calendar';
         z-index: 1000;
         top: 1.9em;
         left: 0;
-        height: 24.25em;
+        height: 23.8em;
         width: 20.5em;
         font-size: 14px;
         background-color: #ffffff;
@@ -68,7 +69,7 @@ import { Calendar } from './calendar';
       }
 
       .datepicker__calendar__content {
-        margin-top: 0.2em auto 0;
+        margin-top: 0.4em;
       }
 
       .datepicker__calendar__labels {
@@ -79,7 +80,6 @@ import { Calendar } from './calendar';
            -ms-flex-pack: center;
          justify-content: center;
         width: 100%;
-        margin-top: 0.4em;
       }
 
       .datepicker__calendar__label {
@@ -107,7 +107,7 @@ import { Calendar } from './calendar';
         display: inline-block;
         width: 2.2em;
         height: 2.2em;
-        margin: 0.4em 0.2em 0;
+        margin: 0 0.2em 0.4em;
         border-radius: 2.2em;
         line-height: 2.2em;
         text-align: center;
@@ -159,6 +159,28 @@ import { Calendar } from './calendar';
         text-align: center;
       }
 
+      .datepicker__calendar__nav__header__form {
+        display: inline-block;
+        margin: 0;
+      }
+
+
+      .datepicker__calendar__nav__header__year {
+        display: inline-block;
+        width: 3em;
+        padding: 0;
+        border: 0;
+        font-size: 1em;
+      }
+
+      .datepicker__calendar__nav__header__year. {
+        border: 1px solid green;
+      }
+
+      .datepicker__calendar__nav__header__year:focus {
+        outline: none;
+      }
+
       .datepicker__input {
         outline: none;
         border-radius: 0.1rem;
@@ -194,19 +216,32 @@ import { Calendar } from './calendar';
           >
           <svg class="datepicker__calendar__nav__chevron" x="0px" y="0px" viewBox="0 0 50 50">
             <g>
-                <path d="M39.7,7.1c0.5,0.5,0.5,1.2,0,1.7L29,19.6c-0.5,0.5-1.2,1.2-1.7,1.7L16.5,32.1c-0.5,0.5-1.2,0.5-1.7,0l-2.3-2.3
+              <path d="M39.7,7.1c0.5,0.5,0.5,1.2,0,1.7L29,19.6c-0.5,0.5-1.2,1.2-1.7,1.7L16.5,32.1c-0.5,0.5-1.2,0.5-1.7,0l-2.3-2.3
                     c-0.5-0.5-1.2-1.2-1.7-1.7l-2.3-2.3c-0.5-0.5-0.5-1.2,0-1.7l10.8-10.8c0.5-0.5,1.2-1.2,1.7-1.7L31.7,0.8c0.5-0.5,1.2-0.5,1.7,0
                     l2.3,2.3c0.5,0.5,1.2,1.2,1.7,1.7L39.7,7.1z"/>
             </g>
             <g>
-                <path d="M33.4,49c-0.5,0.5-1.2,0.5-1.7,0L20.9,38.2c-0.5-0.5-1.2-1.2-1.7-1.7L8.4,25.7c-0.5-0.5-0.5-1.2,0-1.7l2.3-2.3
+              <path d="M33.4,49c-0.5,0.5-1.2,0.5-1.7,0L20.9,38.2c-0.5-0.5-1.2-1.2-1.7-1.7L8.4,25.7c-0.5-0.5-0.5-1.2,0-1.7l2.3-2.3
                     c0.5-0.5,1.2-1.2,1.7-1.7l2.3-2.3c0.5-0.5,1.2-0.5,1.7,0l10.8,10.8c0.5,0.5,1.2,1.2,1.7,1.7l10.8,10.8c0.5,0.5,0.5,1.2,0,1.7
                     L37.4,45c-0.5,0.5-1.2,1.2-1.7,1.7L33.4,49z"/>
             </g>
           </svg>
           </div>
           <div class="datepicker__calendar__nav__header">
-            {{ currentMonth }} {{ currentYear }}
+            <span>{{ currentMonth }}</span>
+            <form
+              class="datepicker__calendar__nav__header__form"
+              [formGroup]="calendarForm"
+              (ngSubmit)="onSubmitCalendarForm(calendarForm)"
+            >
+              <input
+                class="datepicker__calendar__nav__header__year"
+                type="text"
+                placeholder="Year"
+                [formControl]="calendarForm.controls['year']"
+                [(ngModel)]="currentYear"
+              />
+            </form>
           </div>
           <div
             class="datepicker__calendar__nav__arrow"
@@ -312,9 +347,11 @@ export class DatepickerComponent implements OnInit, OnChanges {
   colors: { [id: string]: string };
   // listeners
   clickListener: Function;
+  // forms
+  calendarForm: FormGroup;
 
 
-  constructor(private renderer: Renderer, private elementRef: ElementRef) {
+  constructor(private formBuilder: FormBuilder, private renderer: Renderer, private elementRef: ElementRef) {
     this.dateFormat = 'YYYY-MM-DD';
     // view logic
     this.showCalendar = false;
@@ -335,7 +372,15 @@ export class DatepickerComponent implements OnInit, OnChanges {
       'August', 'September', 'October', 'November', ' December'
     ];
     // listeners
-    this.clickListener = renderer.listenGlobal('document', 'click', (event: MouseEvent) => this.handleGlobalClick(event));
+    this.clickListener = renderer.listenGlobal(
+      'document',
+      'click',
+      (event: MouseEvent) => this.handleGlobalClick(event)
+    );
+    // forms
+    this.calendarForm = formBuilder.group({
+      'year': [null, Validators.compose(Validators.required, Validators.pattern(/.*[^0-9].*/))]
+    });
   }
 
   ngOnInit() {
@@ -477,6 +522,10 @@ export class DatepickerComponent implements OnInit, OnChanges {
     this.date = day;
     this.onSelect.emit(day);
     this.showCalendar = !this.showCalendar;
+  }
+
+  onSubmitCalendarForm(value: any): void {
+    console.log(value);
   }
 
   // Listeners
