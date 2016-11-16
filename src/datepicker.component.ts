@@ -1,13 +1,20 @@
 import {
   animate, Component, ElementRef, EventEmitter, Input, keyframes, OnChanges,
-  OnInit, Output, Renderer, SimpleChange, state, style, transition, trigger
+  OnInit, Output, Renderer, SimpleChange, state, style, transition, trigger, forwardRef
 } from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 import { Calendar } from './calendar';
 
-
 @Component({
   selector: 'material-datepicker',
+  providers: [
+    { 
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => DatepickerComponent),
+      multi: true
+    }
+  ],
   animations: [
     trigger('calendarAnimation', [
       transition('* => left', [
@@ -264,9 +271,11 @@ import { Calendar } from './calendar';
     </div>
     `
 })
-export class DatepickerComponent implements OnInit, OnChanges {
+export class DatepickerComponent implements OnInit, OnChanges, ControlValueAccessor {
 
   private dateVal: Date;
+  propagateChange = (_: any) => {};
+
 
   // two way bindings
   @Output() dateChange = new EventEmitter<Date>();
@@ -275,6 +284,7 @@ export class DatepickerComponent implements OnInit, OnChanges {
   set date(val: Date) {
     this.dateVal = val;
     this.dateChange.emit(val);
+    this.propagateChange(val);
   }
 
   // api bindings
@@ -526,4 +536,15 @@ export class DatepickerComponent implements OnInit, OnChanges {
     this.animate = direction;
     setTimeout(() => this.animate = 'reset', 185);
   }
+
+  writeValue(value: Date) {
+    this.date = value;
+    this.setDate();
+  }
+  
+  registerOnChange(fn:any) {
+    this.propagateChange = fn;
+  }
+
+  registerOnTouched() {}
 }
