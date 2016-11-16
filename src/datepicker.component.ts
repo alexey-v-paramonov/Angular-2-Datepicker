@@ -379,7 +379,7 @@ export class DatepickerComponent implements OnInit, OnChanges {
     );
     // forms
     this.calendarForm = formBuilder.group({
-      'year': [null, Validators.compose(Validators.required, Validators.pattern(/.*[^0-9].*/))]
+      'year': [null, Validators.compose([Validators.required, Validators.pattern(/.*[^0-9].*/)])]
     });
   }
 
